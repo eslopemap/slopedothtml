@@ -116,6 +116,15 @@ async function clearBrowserTileCache() {
   } catch { /* ignore */ }
 }
 
+async function getStorageEstimate() {
+  if (typeof navigator === 'undefined' || !navigator.storage?.estimate) return null;
+  try {
+    return await navigator.storage.estimate();
+  } catch {
+    return null;
+  }
+}
+
 // ---- Panel refresh ----
 
 let _panelEl = null;
@@ -227,12 +236,23 @@ async function refreshPanel() {
 
   // 5. Settings
   const settingsStats = getSettingsStats();
-  container.appendChild(buildRow('Settings', {
+  const settingsRow = buildRow('Settings', {
     path: 'localStorage (slope:settings, slope:profile-settings)',
     size: formatBytes(settingsStats.bytes),
     onClear: () => { clearSettings(); location.reload(); },
     clearLabel: 'Reset & reload',
-  }));
+  });
+  const storageEstimate = await getStorageEstimate();
+  if (storageEstimate) {
+    const quota = storageEstimate.quota ?? 0;
+    const usage = storageEstimate.usage ?? 0;
+    const quotaEl = document.createElement('div');
+    quotaEl.className = 'saved-data-size';
+    quotaEl.textContent = `OPFS quota: ${formatBytes(usage)} / ${formatBytes(quota)}`;
+    quotaEl.dataset.testid = 'saved-data-opfs-quota';
+    settingsRow.querySelector('.saved-data-info').appendChild(quotaEl);
+  }
+  container.appendChild(settingsRow);
 
   // 6. All browser data
   const allStats = getAllStats();

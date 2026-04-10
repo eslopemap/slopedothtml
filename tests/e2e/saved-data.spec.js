@@ -109,6 +109,10 @@ test.describe('Saved Data panel', () => {
     const sizeEl = page.locator('[data-testid="saved-data-size-settings"]');
     const sizeText = await sizeEl.textContent();
     expect(sizeText).not.toContain('0 B');
+
+    const quotaEl = page.locator('[data-testid="saved-data-opfs-quota"]');
+    await expect(quotaEl).toBeVisible();
+    await expect(quotaEl).toContainText('OPFS quota:');
   });
 
   test('Clear GPX tracks button removes tracks on reload', async ({ mapPage: page }) => {

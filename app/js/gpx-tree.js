@@ -1197,7 +1197,7 @@ function renderNodeList(nodes, container, depth) {
     if (hasChildren) {
       const toggle = document.createElement('span');
       toggle.className = 'tree-toggle';
-      toggle.textContent = expanded ? '▾' : '▸';
+      toggle.textContent = expanded ? '⏷' : '⏵';
       if (node.type === 'file') {
          const trks = node.children.filter(c => c.type === 'track' || c.type === 'route');
          if (trks.length <= 1) {
@@ -1216,6 +1216,7 @@ function renderNodeList(nodes, container, depth) {
     } else {
       const spacer = document.createElement('span');
       spacer.className = 'tree-toggle-spacer';
+      spacer.textContent = ' ';
       row.appendChild(spacer);
     }
 
@@ -1346,6 +1347,15 @@ function renderNodeList(nodes, container, depth) {
       }
       if (allTrackIds.length) _deps.fitToTrackIds(allTrackIds);
       syncTreeSelection();
+    });
+
+    row.addEventListener('auxclick', (e) => { // middle-click:
+      if (e.button !== 1) return;
+      if (e.target.classList.contains('tree-kebab') || e.target.classList.contains('tree-toggle')) return;
+      if (node.type === 'segment') return;
+      e.preventDefault();
+      e.stopPropagation();
+      deleteNode(node);
     });
 
     // Right-click context menu

@@ -209,6 +209,23 @@ base.describe('Desktop Track Editor', () => {
     expect(await getTrackCount(page)).toBe(1);
   });
 
+  base('Delete track -- middle click on tree row uses confirmation dialog', async () => {
+    await drawTrackAndFinish(page, 3);
+    expect(await getTrackCount(page)).toBe(1);
+
+    const treeRow = page.locator('.tree-row').filter({ hasText: 'Track 1' }).first();
+    await expect(treeRow).toBeVisible();
+
+    /** @param {import('@playwright/test').Dialog} dialog */
+    const handler = dialog => dialog.accept();
+    page.on('dialog', handler);
+    await treeRow.click({ button: 'middle' });
+    await page.waitForTimeout(200);
+    page.removeListener('dialog', handler);
+
+    expect(await getTrackCount(page)).toBe(0);
+  });
+
   base('Edit existing track -- add more points', async () => {
     await drawTrackAndFinish(page, 3);
     expect(await getActiveTrackPointCount(page)).toBe(3);

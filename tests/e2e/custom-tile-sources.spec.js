@@ -167,4 +167,26 @@ test.describe('Custom TileJSON Sources (web mode)', () => {
     expect(result.found).toBe(true);
     expect(result.persistence).toBe('browser');
   });
+
+  test('middle click on a layer-order row removes it via confirmation dialog', async ({ page }) => {
+    await loadApp(page);
+
+    await page.evaluate(() => {
+      (0, eval)('setBasemap')((0, eval)('map'), (0, eval)('state'), 'osm', false);
+      (0, eval)('renderLayerOrderPanel')();
+    });
+    await page.waitForTimeout(200);
+
+    const layerRow = page.locator('.layer-order-row .layer-order-name').filter({ hasText: 'OpenStreetMap' }).first();
+    await expect(layerRow).toBeVisible();
+
+    /** @param {import('@playwright/test').Dialog} dialog */
+    const handler = dialog => dialog.accept();
+    page.on('dialog', handler);
+    await layerRow.click({ button: 'middle' });
+    await page.waitForTimeout(200);
+    page.removeListener('dialog', handler);
+
+    await expect(page.locator('.layer-order-row .layer-order-name').filter({ hasText: 'OpenStreetMap' })).toHaveCount(0);
+  });
 });

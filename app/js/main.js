@@ -1244,6 +1244,17 @@ function renderLayerOrderPanel() {
   const settings = state.layerSettings || {};
   const basemapSet = new Set(state.basemapStack || []);
 
+  function confirmAndRemoveLayer(catalogId, label) {
+    if (!window.confirm(`Remove layer "${label}"?`)) return;
+    removeLayer(map, state, catalogId);
+    renderLayerOrderPanel();
+    renderAddLayerSelect();
+    syncOverlayCheckboxes(state);
+    syncMapViewState();
+    map.triggerRepaint();
+    scheduleSettingsSave();
+  }
+
   for (let i = order.length - 1; i >= 0; i--) {
     const catalogId = order[i];
     const entry = getCatalogEntry(catalogId);
@@ -1384,17 +1395,19 @@ function renderLayerOrderPanel() {
     removeBtn.textContent = '✕';
     removeBtn.title = 'Remove layer';
     removeBtn.addEventListener('click', () => {
-      removeLayer(map, state, catalogId);
-      renderLayerOrderPanel();
-      renderAddLayerSelect();
-      syncOverlayCheckboxes(state);
-      syncMapViewState();
-      map.triggerRepaint();
-      scheduleSettingsSave();
+      confirmAndRemoveLayer(catalogId, entry.label);
     });
 
     row.append(handle, visBtn, nameSpan, opacityInput, removeBtn);
     container.appendChild(row);
+
+    row.addEventListener('auxclick', (e) => {
+      if (e.button !== 1) return;
+      if (e.target === opacityInput || e.target === removeBtn || e.target === visBtn || e.target === handle) return;
+      e.preventDefault();
+      e.stopPropagation();
+      confirmAndRemoveLayer(catalogId, entry.label);
+    });
 
     // Drag-and-drop
     row.addEventListener('dragstart', (e) => {

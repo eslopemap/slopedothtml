@@ -29,3 +29,11 @@ continue with all git commits and tasks
 ---
 
 the waypoints of a gpx file are put at the global level on import, instead of under the file. fix and commit
+
+---
+
+- make middle click on a track panel node to delete ;
+- in layer order middle click on a map layer  to remove (this does not bypass the dialog)
+- make "add tilejson" less high and put it at the bottom of the layer settings
+- add "OPFS quota" in the settings > storage part using  navigator.storage.estimate() 
+- add a real '+'/'-' instead of the dot in the track list panel
